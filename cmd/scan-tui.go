@@ -108,6 +108,10 @@ func (s *scanTui) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (s *scanTui) renderProgress() string {
+	if len(s.raw) == 0 {
+		return "No mini programs found"
+	}
+	
 	var prog = s.progress.ViewAs(float64(s.table.Cursor()+1) / float64(len(s.raw)))
 	var p = regexp.MustCompile(`\d{1,3}%`).FindString(prog)
 	format := "%" + strconv.Itoa(len(p)) + "s"
@@ -118,6 +122,10 @@ func (s *scanTui) renderProgress() string {
 }
 
 func (s *scanTui) renderDetail() string {
+	if len(s.raw) == 0 {
+		return color.YellowString("  No mini programs found in the specified directory")
+	}
+
 	var result = ""
 
 	var info = s.raw[s.table.Cursor()]

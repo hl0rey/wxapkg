@@ -16,21 +16,75 @@
 
 ![demo](demo.gif)
 
-一般用法如下，目前**只支持 windows 系统**：
+一般用法如下，**支持 Windows 和 macOS 系统**：
 
 1. 用 PC 版微信打开小程序来让微信下载小程序  
-2. 使用 `wxapkg.exe scan` 命令来扫描所有小程序。需要**联网**获取小程序的名称、路径、wxid（用于后续解密）等信息  
+2. 使用 `wxapkg scan` 命令来扫描所有小程序。需要**联网**获取小程序的名称、路径、wxid（用于后续解密）等信息  
 3. 使用键盘上下键选中想要处理的小程序，然后按回车来执行解密+解包  
 
-如果想手动来解密指定小程序，可以使用 `wxapkg.exe unpack` 命令，需要指定小程序 wxapkg 文件路径，同时指定小程序的 `wxid`。如果没指定 `wxid`，会自动从路径中使用正则表达式匹配获取
+如果想手动来解密指定小程序，可以使用 `wxapkg unpack` 命令，需要指定小程序 wxapkg 文件路径，同时指定小程序的 `wxid`。如果没指定 `wxid`，会自动从路径中使用正则表达式匹配获取
+
+### 默认小程序路径（原程序实际支持macOS，指定路径即可）
+
+- **Windows**: `C:\Users\{用户名}\Documents\WeChat Files\Applet`
+- **macOS**: `~/Library/Containers/com.tencent.xinWeChat/Data/Documents/app_data/radium/Applet/packages`
+
+如果程序未能自动找到小程序路径，可以使用 `-r` 参数手动指定路径
+
+#### macOS 特别说明
+
+macOS 微信小程序的目录结构为：
+```
+packages/
+├── wx12345678901234/    # 小程序 wxid
+│   ├── 709/            # 版本号
+│   │   └── *.wxapkg    # 小程序包文件
+│   └── ...
+└── ...
+```
+
+使用示例：
+```bash
+# 扫描所有小程序（指向 packages 目录）
+wxapkg scan -r ~/Library/Containers/com.tencent.xinWeChat/Data/Documents/app_data/radium/Applet/packages
+
+# 或使用自动检测（如果路径正确）
+wxapkg scan
+```
 
 ## ⚒️ 安装
 
-下载最新的发布版本 [release](https://github.com/wux1an/wxapkg/releases/latest)，或者用下面的命令自己编译
+### 方式1: 下载预编译版本
 
-```
+下载最新的发布版本 [release](https://github.com/wux1an/wxapkg/releases/latest)
+
+### 方式2: 使用 go install
+
+```bash
 go install github.com/wux1an/wxapkg@latest
 ```
+
+### 方式3: 从源码编译
+
+```bash
+# 克隆仓库
+git clone https://github.com/wux1an/wxapkg.git
+cd wxapkg
+
+# macOS / Linux
+./build.sh current      # 编译当前平台
+./build.sh install      # 安装到 GOPATH
+
+# Windows
+build.bat current       # 编译当前平台
+build.bat install       # 安装到 GOPATH
+
+# 或使用 Makefile
+make build              # 编译当前平台
+make install            # 安装到 GOPATH
+```
+
+更多编译选项请查看 [编译指南](BUILD.md)
 
 ## 🔗 参考
 

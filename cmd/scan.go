@@ -2,19 +2,20 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"regexp"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/wux1an/wxapkg/util"
-	"os"
-	"path/filepath"
-	"regexp"
 )
 
 var scanCmd = &cobra.Command{
 	Use:     "scan",
 	Short:   "Scan the wechat mini program",
-	Example: "  " + programName + " scan -r \"D:\\WeChat Files\\Applet\\wx12345678901234\"",
+	Example: "  " + programName + " scan -r \"" + util.GetExamplePath() + "\"",
 	Run: func(cmd *cobra.Command, args []string) {
 		root, err := cmd.Flags().GetString("root")
 		if err != nil {
@@ -44,14 +45,24 @@ var scanCmd = &cobra.Command{
 				info.Error = fmt.Sprintf("%v", err)
 			}
 
-			wxidInfos = append(wxidInfos, info)
-		}
+		wxidInfos = append(wxidInfos, info)
+	}
 
-		var tui = newScanTui(wxidInfos)
-		if _, err := tea.NewProgram(tui, tea.WithAltScreen()).Run(); err != nil {
-			color.Red("Error running program: %v", err)
-			os.Exit(1)
-		}
+	// 检查是否找到任何小程序
+	if len(wxidInfos) == 0 {
+		color.Yellow("[!] No mini programs found in '%s'", root)
+		color.Yellow("[!] Please make sure:")
+		color.Yellow("    1. WeChat is installed and you have opened some mini programs")
+		color.Yellow("    2. The path is correct (use -r to specify custom path)")
+		color.Yellow("    3. The directory contains folders matching pattern: wx[0-9a-f]{16}")
+		return
+	}
+
+	var tui = newScanTui(wxidInfos)
+	if _, err := tea.NewProgram(tui, tea.WithAltScreen()).Run(); err != nil {
+		color.Red("Error running program: %v", err)
+		os.Exit(1)
+	}
 
 		if tui.selected == nil {
 			return
@@ -69,8 +80,7 @@ var scanCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(scanCmd)
 
-	var homeDir, _ = os.UserHomeDir()
-	var defaultRoot = filepath.Join(homeDir, "Documents/WeChat Files/Applet")
+	var defaultRoot = util.GetDefaultWeChatAppletPath()
 
 	scanCmd.Flags().StringP("root", "r", defaultRoot, "the mini app path")
 }

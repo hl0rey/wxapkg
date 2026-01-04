@@ -25,7 +25,7 @@ var programName = filepath.Base(os.Args[0])
 var unpackCmd = &cobra.Command{
 	Use:     "unpack",
 	Short:   "Decrypt wechat mini program",
-	Example: "  " + programName + "unpack -o unpack -r \"D:\\WeChat Files\\Applet\\wx12345678901234\"",
+	Example: "  " + programName + " unpack -o unpack -r \"" + util.GetExamplePath() + "\"",
 	Run: func(cmd *cobra.Command, args []string) {
 		root, _ := cmd.Flags().GetString("root")
 		output, _ := cmd.Flags().GetString("output")
@@ -262,8 +262,7 @@ func decryptFile(wxid, wxapkgPath string) []byte {
 func init() {
 	RootCmd.AddCommand(unpackCmd)
 
-	var homeDir, _ = os.UserHomeDir()
-	var defaultRoot = filepath.Join(homeDir, "Documents/WeChat Files/Applet", "wx00000000000000")
+	var defaultRoot = filepath.Join(util.GetDefaultWeChatAppletPath(), "wx00000000000000")
 
 	unpackCmd.Flags().StringP("root", "r", "", "the mini progress path you want to decrypt, see: "+defaultRoot)
 	unpackCmd.Flags().StringP("output", "o", "unpack", "the output path to save result")

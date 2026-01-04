@@ -1,0 +1,49 @@
+# 编译产物
+/dist/
+/bin/
+/build/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+wxapkg
+wxapkg-*
+
+# 测试
+*.test
+*.out
+coverage.txt
+
+# Go 工作空间
+/vendor/
+
+# 依赖
+go.work
+go.work.sum
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# 临时文件
+*.tmp
+*.log
+
+# 输出目录
+/unpack/
+/output/
+
+# 缓存文件
+wxid.json
+detail.json
+
+# 压缩包
+*.zip
+*.tar.gz
+*.tgz
+
