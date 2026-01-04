@@ -45,8 +45,8 @@ var scanCmd = &cobra.Command{
 				info.Error = fmt.Sprintf("%v", err)
 			}
 
-		wxidInfos = append(wxidInfos, info)
-	}
+			wxidInfos = append(wxidInfos, info)
+		}
 
 	// 检查是否找到任何小程序
 	if len(wxidInfos) == 0 {
@@ -58,11 +58,11 @@ var scanCmd = &cobra.Command{
 		return
 	}
 
-	var tui = newScanTui(wxidInfos)
-	if _, err := tea.NewProgram(tui, tea.WithAltScreen()).Run(); err != nil {
-		color.Red("Error running program: %v", err)
-		os.Exit(1)
-	}
+		var tui = newScanTui(wxidInfos)
+		if _, err := tea.NewProgram(tui, tea.WithAltScreen()).Run(); err != nil {
+			color.Red("Error running program: %v", err)
+			os.Exit(1)
+		}
 
 		if tui.selected == nil {
 			return

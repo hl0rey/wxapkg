@@ -1,34 +1,129 @@
-name: 🎉 Release Binary
+name: Release
+
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*'  # 当推送 v* 标签时触发，例如 v1.0.0
 
 permissions:
   contents: write
 
 jobs:
   release:
+    name: Create Release
     runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      version: ${{ steps.get_version.outputs.version }}
     steps:
-      - name: Install upx
-        run: sudo apt install upx -y
+      - name: Get version from tag
+        id: get_version
+        run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: 1.19
-
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v4
-        with:
-          distribution: goreleaser
-          version: latest
-          args: release --clean
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ steps.get_version.outputs.version }}
+          draft: false
+          prerelease: false
+          body: |
+            ## 🎉 Release ${{ steps.get_version.outputs.version }}
+            
+            ### 📦 下载
+            
+            请根据你的操作系统下载对应的版本：
+            
+            - **Windows (64位)**: `wxapkg-windows-amd64.zip`
+            - **macOS (Intel)**: `wxapkg-darwin-amd64.tar.gz`
+            - **macOS (Apple Silicon)**: `wxapkg-darwin-arm64.tar.gz`
+            
+            ### 📝 使用方法
+            
+            1. 下载对应平台的压缩包
+            2. 解压缩
+            3. 运行 `wxapkg scan` 或 `wxapkg unpack`
+            
+            详细文档请查看 [README.md](https://github.com/${{ github.repository }}/blob/main/README.md)
+
+  build-windows:
+    name: Build Windows
+    needs: release
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.19'
+
+      - name: Get dependencies
+        run: go mod download
+
+      - name: Build Windows amd64
+        env:
+          CGO_ENABLED: 0
+          GOOS: windows
+          GOARCH: amd64
+        run: |
+          go build -trimpath -ldflags "-s -w -X main.version=${{ needs.release.outputs.version }} -X main.commit=${{ github.sha }}" -o wxapkg.exe .
+
+      - name: Create ZIP archive
+        run: |
+          Compress-Archive -Path wxapkg.exe -DestinationPath wxapkg-windows-amd64.zip
+
+      - name: Upload Windows Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          asset_path: ./wxapkg-windows-amd64.zip
+          asset_name: wxapkg-windows-amd64.zip
+          asset_content_type: application/zip
+
+  build-macos:
+    name: Build macOS
+    needs: release
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.19'
+
+      - name: Get dependencies
+        run: go mod download
+
+      - name: Build macOS ${{ matrix.arch }}
+        env:
+          CGO_ENABLED: 0
+          GOOS: darwin
+          GOARCH: ${{ matrix.arch }}
+        run: |
+          go build -trimpath -ldflags "-s -w -X main.version=${{ needs.release.outputs.version }} -X main.commit=${{ github.sha }}" -o wxapkg .
+
+      - name: Create tar.gz archive
+        run: |
+          tar -czf wxapkg-darwin-${{ matrix.arch }}.tar.gz wxapkg
+
+      - name: Upload macOS Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          asset_path: ./wxapkg-darwin-${{ matrix.arch }}.tar.gz
+          asset_name: wxapkg-darwin-${{ matrix.arch }}.tar.gz
+          asset_content_type: application/gzip

@@ -1,5 +1,11 @@
 # wxapkg
 
+[![Release](https://img.shields.io/github/v/release/wux1an/wxapkg?style=flat-square)](https://github.com/wux1an/wxapkg/releases/latest)
+[![Test](https://img.shields.io/github/actions/workflow/status/wux1an/wxapkg/test.yml?branch=main&label=test&style=flat-square)](https://github.com/wux1an/wxapkg/actions/workflows/test.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/wux1an/wxapkg?style=flat-square)](https://goreportcard.com/report/github.com/wux1an/wxapkg)
+[![License](https://img.shields.io/github/license/wux1an/wxapkg?style=flat-square)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-blue?style=flat-square)](https://github.com/wux1an/wxapkg/releases)
+
 > **免责声明**：此工具仅限于学习和研究软件内含的设计思想和原理，用户承担因使用此工具而导致的所有法律和相关责任！作者不承担任何法律责任！
 
 ## 📝 功能
